@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notepad App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .note{
+            display: flex;
+            flex-direction: column;
+        }
+            </style>
+</head>
+<body>
+    <input type="text" placeholder="title" id="title">
+    <textarea id="noteContent" placeholder="Write your notes here..."></textarea>
+    <button onclick="saveNote()">Save Note</button>
+    <div id="notes"></div>
+   <script>
+    function saveNote() {
+        const content = document.getElementById('noteContent').value;
+      const title = document.getElementById('title').value;
+      
+        fetch('/save-note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ content,title})
+        }).then(() => {
+            document.getElementById('noteContent').value = '';
+            document.getElementById('title').value = '';
+            loadNotes();
+        });
+    }
+
+    function updateNote(id) {
+     const content1 = document.getElementById('content'+id).value;
+      const title2 = document.getElementById('title'+id).value;
+      
+    
+        fetch('/update-note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ id: id.toString(), content1,title2})
+        }).then(() => {
+            loadNotes();
+        });
+    }
+
+
+
+    function deleteNote(id) {
+        fetch('/delete-note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ id: id.toString() })
+        }).then(() => {
+            loadNotes();
+        });
+    }
+
+    function loadNotes() {
+        fetch('/get-notes')
+            .then(response => response.json())
+            .then(data => {
+                const notesDiv = document.getElementById('notes');
+                notesDiv.innerHTML = data.map(note => `
+                    <div class="note">
+                        <input type="text" id="title${note._id}" value="${note.title}" >
+                        <textarea id="content${note._id}" >${note.content}</textarea>
+                        <button onclick="deleteNote('${note._id}')">Delete</button>
+                         <button onclick="updateNote('${note._id}')">Update</button>
+                    </div>
+                `).join('');
+            });
+    }
+
+    window.onload = loadNotes;
+</script>
+</body>
+</html>
