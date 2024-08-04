@@ -3,7 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const db = require('./database');
 const app = express();
-const port = Math.floor(Math.random()*3000);
+const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
